@@ -9,7 +9,7 @@ import Register from "./pages/Register";
 import VerifyOTP from "./pages/VerifyOTP";
 import ProductDetails from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
-import Checkout from "./pages/CheckOut";
+import Checkout from "./pages/Checkout";
 import Shop from "./pages/Shop";
 import ScrollToTop from "./components/ScrollToTop";
 import OrderSuccess from "./pages/OrderSuccess";
