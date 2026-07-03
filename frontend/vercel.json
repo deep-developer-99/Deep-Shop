@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://deep-shop.onrender.com/api/:path*"
+    }
+  ]
+}
