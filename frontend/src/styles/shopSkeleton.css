@@ -1,0 +1,97 @@
+.shop-skeleton {
+  padding: 40px 5%;
+}
+
+/* Title */
+.skeleton-title {
+  width: 250px;
+  height: 42px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+/* Search Bar */
+.skeleton-search {
+  width: 420px;
+  max-width: 100%;
+  height: 55px;
+  border-radius: 10px;
+  margin-bottom: 40px;
+}
+
+/* Grid */
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 30px;
+}
+
+/* Card */
+
+.skeleton-card {
+  background: #17171b;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Image */
+
+.skeleton-image {
+  width: 100%;
+  height: 270px;
+}
+
+/* Content */
+
+.skeleton-content {
+  padding: 18px;
+}
+
+.skeleton-name {
+  width: 75%;
+  height: 24px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.skeleton-price {
+  width: 35%;
+  height: 20px;
+  border-radius: 6px;
+  margin-bottom: 18px;
+}
+
+.skeleton-btn {
+  width: 45%;
+  height: 20px;
+  border-radius: 6px;
+}
+
+/* Shimmer */
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #2b2b31;
+}
+
+.shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

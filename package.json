@@ -1,0 +1,26 @@
+{
+  "name": "deepshop-full-stack",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "deep",
+    "microservice"
+  ],
+  "license": "ISC",
+  "author": "Deepanshu Rawat",
+  "type": "commonjs",
+  "main": "index.jsx",
+  "scripts": {
+    "dev:server": "cd backend && npm run dev",
+    "dev:client": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "start:server": "cd backend && npm start",
+    "start:client": "cd frontend && npm start",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+    "build": "cd frontend && npm run build",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
