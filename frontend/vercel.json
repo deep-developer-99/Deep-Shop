@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://deep-shop.onrender.com/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }
