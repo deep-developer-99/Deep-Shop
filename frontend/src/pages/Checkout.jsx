@@ -25,8 +25,60 @@ const Checkout = () => {
     0,
   );
 
+  const createOrderPayload = (paymentId) => ({
+    items: cartItems.map((item) => ({
+      product: item.productId,
+      quantity: item.qty,
+      price: item.price,
+    })),
+    totalAmount: totalPrice,
+    address: Object.fromEntries(
+      Object.entries(address).map(([key, value]) => [key, value.trim()]),
+    ),
+    paymentId,
+  });
+
+  const saveOrderAndRedirect = async (paymentId) => {
+    const saveOrderRes = await fetch(apiUrl("/api/orders"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
+      },
+      body: JSON.stringify(createOrderPayload(paymentId)),
+    });
+
+    let responseData = {};
+    try {
+      responseData = await saveOrderRes.json();
+    } catch (error) {
+      responseData = {};
+    }
+
+    if (!saveOrderRes.ok) {
+      throw new Error(responseData.message || "Order saving failed");
+    }
+
+    dispatch(clearCart());
+    navigate("/order-success", { replace: true });
+  };
+
   const handlePayment = async () => {
     try {
+      if (!user?.token) {
+        alert("Please login first");
+        navigate("/login");
+        return;
+      }
+
+      const isAddressComplete = Object.values(address).every((value) =>
+        value.trim(),
+      );
+      if (!isAddressComplete) {
+        alert("Please fill in the full shipping address before paying.");
+        return;
+      }
+
       const orderRes = await fetch(apiUrl("/api/payment/order"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,29 +112,11 @@ const Checkout = () => {
             body: JSON.stringify(response),
           });
           if (verifyRes.ok) {
-            const saveOrderRes = await fetch(apiUrl("/api/orders"), {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${user.token}`,
-              },
-              body: JSON.stringify({
-                items: cartItems.map((item) => ({
-                  product: item.productId,
-                  quantity: item.qty,
-                  price: item.price,
-                })),
-                totalAmount: totalPrice,
-                address,
-                paymentId: response.razorpay_payment_id,
-              }),
-            });
-
-            if (saveOrderRes.ok) {
-              dispatch(clearCart());
-              navigate("/order-success");
-            } else {
-              alert("Order saving failed");
+            try {
+              await saveOrderAndRedirect(response.razorpay_payment_id);
+            } catch (error) {
+              console.error(error);
+              alert(error.message || "Order saving failed");
             }
           } else {
             alert("Payment verification failed");
@@ -127,26 +161,11 @@ const Checkout = () => {
   };
 
   const bypassPayment = async () => {
-    const saveOrderRes = await fetch(apiUrl("/api/orders"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.token}`,
-      },
-      body: JSON.stringify({
-        items: cartItems.map((item) => ({
-          product: item.productId,
-          quantity: item.qty,
-          price: item.price,
-        })),
-        totalAmount: totalPrice,
-        address,
-        paymentId: "bypass_txn_" + new Date().getTime(),
-      }),
-    });
-    if (saveOrderRes.ok) {
-      dispatch(clearCart());
-      navigate("/order-success");
+    try {
+      await saveOrderAndRedirect("bypass_txn_" + new Date().getTime());
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Order saving failed");
     }
   };
 

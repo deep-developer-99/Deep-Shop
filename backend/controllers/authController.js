@@ -11,8 +11,9 @@ const generateToken = (id) => {
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
+  const normalizedEmail = email?.trim().toLowerCase();
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -20,27 +21,39 @@ const registerUser = async (req, res) => {
     // Hash the password before saving it to the database
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({
+      name,
+      email: normalizedEmail,
+      password: hashedPassword,
+    });
 
     if (user) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
       // Save OTP to database using the OTP schema
       await OTP.findOneAndUpdate(
-        { email },
+        { email: normalizedEmail },
         { otp, createdAt: new Date() },
         { upsert: true, new: true, setDefaultsOnInsert: true },
       );
 
-      // Welcome Mail after successful registration with OTP
-      const message = `Welcome to deepshop. Your OTP for deepshop registration is: ${otp}. Please do not share this OTP with anyone. It is valid for 5 minutes.`;
-      await sendEmail(email, "deepshop Registration OTP", message);
+      let emailSent = true;
+      try {
+        // Welcome Mail after successful registration with OTP
+        const message = `Welcome to deepshop. Your OTP for deepshop registration is: ${otp}. Please do not share this OTP with anyone. It is valid for 5 minutes.`;
+        await sendEmail(normalizedEmail, "deepshop Registration OTP", message);
+      } catch (emailError) {
+        emailSent = false;
+        console.error("OTP email send failed:", emailError);
+      }
 
       res.status(201).json({
-        message:
-          "Registration Successful! Please check your email for the verification OTP.",
+        message: emailSent
+          ? "Registration Successful! Please check your email for the verification OTP."
+          : "Registration successful, but OTP email could not be sent right now. You can use resend OTP or try again later.",
         email: user.email,
         isVerified: false,
+        emailSent,
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
@@ -54,8 +67,9 @@ const registerUser = async (req, res) => {
 // Login user
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
+  const normalizedEmail = email?.trim().toLowerCase();
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (user && (await bcrypt.compare(password, user.password))) {
       // Check if user is verified
       if (!user.isVerified) {
@@ -85,17 +99,18 @@ const loginUser = async (req, res) => {
 // Verify OTP
 const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
+  const normalizedEmail = email?.trim().toLowerCase();
   try {
-    const otpRecord = await OTP.findOne({ email });
+    const otpRecord = await OTP.findOne({ email: normalizedEmail });
     if (!otpRecord) {
       return res.status(400).json({ message: "OTP has expired or is invalid" });
     }
 
-    if (otpRecord.otp !== otp) {
+    if (String(otpRecord.otp) !== String(otp).trim()) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -124,8 +139,9 @@ const verifyOTP = async (req, res) => {
 // Resend OTP
 const resendOTP = async (req, res) => {
   const { email } = req.body;
+  const normalizedEmail = email?.trim().toLowerCase();
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -138,13 +154,17 @@ const resendOTP = async (req, res) => {
 
     // Save/update OTP
     await OTP.findOneAndUpdate(
-      { email },
+      { email: normalizedEmail },
       { otp, createdAt: new Date() },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
 
     const message = `Your new OTP for deepshop registration is: ${otp}. Please do not share this OTP with anyone. It is valid for 5 minutes.`;
-    await sendEmail(email, "deepshop Registration OTP (Resent)", message);
+    await sendEmail(
+      normalizedEmail,
+      "deepshop Registration OTP (Resent)",
+      message,
+    );
 
     res.status(200).json({ message: "OTP has been resent to your email" });
   } catch (error) {

@@ -1,4 +1,6 @@
 const About = () => {
+  const profilePhoto = "/dp.jpg";
+
   const containerStyle = {
     maxWidth: "900px",
     margin: "0 auto",
@@ -25,7 +27,7 @@ const About = () => {
   return (
     <div style={containerStyle}>
       <img
-        src="./public/dp.jpg"
+        src={profilePhoto}
         alt="@deepanshu_rawat"
         style={{
           width: "180px",
