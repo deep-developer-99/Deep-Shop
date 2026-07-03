@@ -29,23 +29,19 @@ app.use("/api/payment", require("./routes/paymentRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 
 // Server frontend in production
-// if (process.env.NODE_ENV === "production") {
-//   app.use(express.static(path.join(__dirname, "../frontend/dist")));
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-//   app.use("*", (req, res) => {
-//     res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
-//   });
-// } else {
-//   app.get("/", (req, res) => {
-//     res.send(
-//       "DeepShop API is in Development mode. Frontend is not served in this mode.",
-//     );
-//   });
-// }
-
-app.get("/", (req, res) => {
-  res.send("DeepShop API is running...");
-});
+  app.use("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send(
+      "DeepShop API is in Development mode. Frontend is not served in this mode.",
+    );
+  });
+}
 
 connectDB()
   .then(() => {
