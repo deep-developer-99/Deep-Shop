@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import ShopSkeleton from "../components/ShopSkeleton";
 import "../styles/productCard.css";
+import { apiUrl } from "../config/api";
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -11,7 +12,7 @@ const Shop = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+        const res = await fetch(apiUrl("/api/products"));
         const data = await res.json();
         setProducts(data);
       } catch (error) {

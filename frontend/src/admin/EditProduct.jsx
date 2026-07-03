@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiUrl } from "../config/api";
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -19,9 +20,7 @@ const EditProduct = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/products/${id}`,
-      );
+      const res = await fetch(apiUrl(`/api/products/${id}`));
       const data = await res.json();
       setFormData({
         name: data.name,
@@ -45,14 +44,11 @@ const EditProduct = () => {
     data.append("stock", formData.stock);
     if (image) data.append("image", image);
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/products/${id}`,
-      {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${user.token}` },
-        body: data,
-      },
-    );
+    const res = await fetch(apiUrl(`/api/products/${id}`), {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${user.token}` },
+      body: data,
+    });
     setLoading(false);
     if (res.ok) {
       alert("Product updated successfully!");

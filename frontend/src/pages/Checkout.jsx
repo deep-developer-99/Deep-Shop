@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { clearCart } from "../redux/cartSlice";
+import { apiUrl } from "../config/api";
 
 const Checkout = () => {
   const { user } = useContext(AuthContext);
@@ -26,14 +27,11 @@ const Checkout = () => {
 
   const handlePayment = async () => {
     try {
-      const orderRes = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/payment/order`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: totalPrice, currency: "INR" }),
-        },
-      );
+      const orderRes = await fetch(apiUrl("/api/payment/order"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: totalPrice, currency: "INR" }),
+      });
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
@@ -56,35 +54,29 @@ const Checkout = () => {
         description: "Test Transaction",
         order_id: orderData.order.id,
         handler: async function (response) {
-          const verifyRes = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/payment/verify-payment`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
-            },
-          );
+          const verifyRes = await fetch(apiUrl("/api/payment/verify-payment"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response),
+          });
           if (verifyRes.ok) {
-            const saveOrderRes = await fetch(
-              `${import.meta.env.VITE_API_URL}/api/orders`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${user.token}`,
-                },
-                body: JSON.stringify({
-                  items: cartItems.map((item) => ({
-                    product: item.productId,
-                    quantity: item.qty,
-                    price: item.price,
-                  })),
-                  totalAmount: totalPrice,
-                  address,
-                  paymentId: response.razorpay_payment_id,
-                }),
+            const saveOrderRes = await fetch(apiUrl("/api/orders"), {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${user.token}`,
               },
-            );
+              body: JSON.stringify({
+                items: cartItems.map((item) => ({
+                  product: item.productId,
+                  quantity: item.qty,
+                  price: item.price,
+                })),
+                totalAmount: totalPrice,
+                address,
+                paymentId: response.razorpay_payment_id,
+              }),
+            });
 
             if (saveOrderRes.ok) {
               dispatch(clearCart());
@@ -135,26 +127,23 @@ const Checkout = () => {
   };
 
   const bypassPayment = async () => {
-    const saveOrderRes = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/orders`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({
-          items: cartItems.map((item) => ({
-            product: item.productId,
-            quantity: item.qty,
-            price: item.price,
-          })),
-          totalAmount: totalPrice,
-          address,
-          paymentId: "bypass_txn_" + new Date().getTime(),
-        }),
+    const saveOrderRes = await fetch(apiUrl("/api/orders"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
       },
-    );
+      body: JSON.stringify({
+        items: cartItems.map((item) => ({
+          product: item.productId,
+          quantity: item.qty,
+          price: item.price,
+        })),
+        totalAmount: totalPrice,
+        address,
+        paymentId: "bypass_txn_" + new Date().getTime(),
+      }),
+    });
     if (saveOrderRes.ok) {
       dispatch(clearCart());
       navigate("/order-success");

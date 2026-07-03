@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/auth.css";
+import { apiUrl } from "../config/api";
 
 const VerifyOTP = () => {
   const location = useLocation();
@@ -25,14 +26,11 @@ const VerifyOTP = () => {
     setError("");
     setMessage("");
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/verify-otp`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp }),
-        },
-      );
+      const res = await fetch(apiUrl("/api/auth/verify-otp"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
       const data = await res.json();
       if (res.ok) {
         alert("Email verified successfully!");
@@ -56,14 +54,11 @@ const VerifyOTP = () => {
     setMessage("");
     setIsResending(true);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/resend-otp`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        },
-      );
+      const res = await fetch(apiUrl("/api/auth/resend-otp"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       const data = await res.json();
       if (res.ok) {
         setMessage(

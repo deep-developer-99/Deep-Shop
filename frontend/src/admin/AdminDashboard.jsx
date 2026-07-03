@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from "../config/api";
 
 const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -15,12 +16,9 @@ const AdminDashboard = () => {
 
     const fetchStats = async () => {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/analytics`,
-          {
-            headers: { Authorization: `Bearer ${user.token}` },
-          },
-        );
+        const res = await fetch(apiUrl("/api/analytics"), {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
         const data = await res.json();
         console.log("Fetched stats:", data);
         if (res.ok) {

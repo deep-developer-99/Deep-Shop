@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import { useLocation } from "react-router-dom";
+import { apiUrl } from "../config/api";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -8,7 +9,7 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+        const res = await fetch(apiUrl("/api/products"));
         if (!res.ok) {
           throw new Error(`Failed to load products: ${res.status}`);
         }

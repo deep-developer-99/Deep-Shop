@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
+import { apiUrl } from "../config/api";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -15,9 +16,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products/${id}`,
-        );
+        const res = await fetch(apiUrl(`/api/products/${id}`));
         const data = await res.json();
         setProduct(data);
       } catch (error) {
